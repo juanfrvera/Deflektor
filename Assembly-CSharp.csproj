@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\Lib\EventLib.cs" />
     <Compile Include="Assets\Scripts\Play\Level.cs" />
     <Compile Include="Assets\Scripts\Play\Lives.cs" />
+    <Compile Include="Assets\Scripts\Play\Mirror.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Game.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Menu.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Play.cs" />
