@@ -107,8 +107,24 @@ public class Game : MonoBehaviour
 		}
 		private void SceneUnloaded(Scene scene) => this.SceneUnloaded(scene.name);
 		#endregion Scene
-		public static void Exit()
+		#region Input
+		private static IInputController inputController;
+		public static IInputController InputController
 		{
-				Application.Quit();
+				private get => inputController;
+				set => inputController = value; 
 		}
+		private void Update()
+		{
+				if(InputController!= null)
+				{
+						if (Input.GetKeyDown(KeyCode.Escape))
+								inputController.Escape();
+
+						if (Input.GetKeyDown(KeyCode.Return))
+								inputController.Enter();
+				}
+		}
+		#endregion
+		public static void Exit() => Application.Quit();
 }

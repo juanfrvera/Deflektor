@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using DelegateLib;
 
-public class Menu : MonoBehaviour
+public class Menu : MonoBehaviour, IInputController
 {
 		#region Load
 		private const string SCENE_NAME = "Menu";
@@ -12,18 +12,19 @@ public class Menu : MonoBehaviour
 		{
 #if UNITY_EDITOR
 				if (!Game.IsLoaded)
-						Game.LoadSelf(PlayMusic);
+						Game.LoadSelf(Loaded);
 				else
-						PlayMusic();
+						Loaded();
 #else
-				PlayMusic();
+				Loaded();
 #endif
 		}
-		private void PlayMusic()
+		private void Loaded()
 		{
 				Sound.Menu();
+				Game.InputController = this;
 		}
-		#region UI
+		#region UI & Input
 		public void ClickPlay()
 		{
 				//Unload scene and then load Play
@@ -32,10 +33,13 @@ public class Menu : MonoBehaviour
 		public void ClickSettings()
 		{
 				Settings.Load();
+				Settings.ExitListener = delegate () { Game.InputController = this; };
 		}
-		public void ClickExit()
-		{
-				Game.Exit();
-		}
-		#endregion UI
+
+		public void ClickExit() => Game.Exit();
+
+		void IInputController.Escape() => ClickExit();
+
+		void IInputController.Enter() { }
+		#endregion UI & Input
 }
