@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using DelegateLib;
+using System.Collections;
 
 public class Play : MonoBehaviour, IInputController
 {
@@ -71,8 +72,45 @@ public class Play : MonoBehaviour, IInputController
 
 		void IInputController.Escape() => Pause = !Pause;
 
-		void IInputController.Enter(){}
+		void IInputController.Enter() { }
 		#endregion UI & Input
+
+		#region Hurt
+		[SerializeField] float hurtTime;//Time between hurts
+		[SerializeField] float hurtAmount;
+		[SerializeField] float maxOverload;
+		private float overload = 0f;
+
+		private Coroutine hurtingCoroutine;
+		public void BeginHurt()
+		{
+				if (hurtingCoroutine != null)
+						StopCoroutine(hurtingCoroutine);
+
+				hurtingCoroutine = StartCoroutine(Hurting());
+
+				Debug.LogWarning("Started overloading...");
+		}
+		private IEnumerator Hurting()
+		{
+				while (overload < maxOverload)
+				{
+
+						yield return new WaitForSeconds(hurtTime);
+						overload += hurtAmount;
+				}
+				Overloaded();
+		}
+		public void EndHurt()
+		{
+				Debug.Log("Overload fixed");
+		}
+		private void Overloaded()
+		{
+				Debug.LogError("Overloaded");
+		}
+		#endregion Hurt
+
 
 		[SerializeField] GameObject gameOverScreen;
 		public void GameOver()
@@ -89,9 +127,6 @@ public class Play : MonoBehaviour, IInputController
 
 		private byte levelIndex = 0;
 		private Level ActualLevel => levels[levelIndex];
-
-#if UNITY_EDITOR
-#endif
 		private void LoadLevel(byte level = 0)
 		{
 				this.levelIndex = level;
@@ -99,9 +134,9 @@ public class Play : MonoBehaviour, IInputController
 				Game.LoadScene(ActualLevel.SceneName, LevelLoaded);
 		}
 
-		private void LevelLoaded(){}
+		private void LevelLoaded() { }
 		private bool gameOver = false;
-		private void LevelEnded()
+		public void LevelWon()
 		{
 				if (levelIndex < levels.Length - 1 && !winned)//Si todavía hay más niveles por cargar
 						LoadNextLevel();
