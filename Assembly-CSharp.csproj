@@ -63,12 +63,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Interface\IBeamable.cs" />
     <Compile Include="Assets\Scripts\Interface\IInputController.cs" />
     <Compile Include="Assets\Scripts\Lib\DelegateLib.cs" />
     <Compile Include="Assets\Scripts\Lib\EventLib.cs" />
+    <Compile Include="Assets\Scripts\Play\Beamer.cs" />
+    <Compile Include="Assets\Scripts\Play\Emitter.cs" />
+    <Compile Include="Assets\Scripts\Play\Laser.cs" />
     <Compile Include="Assets\Scripts\Play\Level.cs" />
     <Compile Include="Assets\Scripts\Play\Lives.cs" />
     <Compile Include="Assets\Scripts\Play\Mirror.cs" />
+    <Compile Include="Assets\Scripts\Play\Receiver.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Game.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Menu.cs" />
     <Compile Include="Assets\Scripts\Skeleton\Play.cs" />
