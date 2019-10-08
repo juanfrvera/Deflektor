@@ -8,9 +8,7 @@ public class Game : MonoBehaviour
 
 		private static Game instance;//Singleton
 
-#if UNITY_EDITOR//Solo se usa para que probar desde cualquier escena sea más facil (en el juego final no se usa)
 		public static bool IsLoaded => instance != null;
-#endif
 		public static void LoadSelf(VoidDelegate onLoad = null) => LoadScene(SCENE_NAME, onLoad);
 
 		private void Awake()
