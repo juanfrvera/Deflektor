@@ -10,14 +10,10 @@ public class Menu : MonoBehaviour, IInputController
 		#endregion Load
 		private void Awake()
 		{
-#if UNITY_EDITOR
 				if (!Game.IsLoaded)
 						Game.LoadSelf(Loaded);
 				else
 						Loaded();
-#else
-				Loaded();
-#endif
 		}
 		private void Loaded()
 		{
