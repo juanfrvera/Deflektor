@@ -1,19 +1,17 @@
-﻿using UnityEngine;
+﻿using NodeSpace;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class Mirror : Beamer, IBeamable
 {
+		#region Rotation
 		[SerializeField] float minDragTime = 1f;//The time you have to waite before start rotating with drag
 		[SerializeField] float draggingTime = 0.5f;//The waited time when a drag rotation has occur
-
-
-
-		private Vector3 Normal => transform.up;
-		public override Vector3 Direction => Vector3.Reflect(prevBeamer.Direction, Normal);
-
-		#region Rotation
+		[SerializeField] Transform graphic;
 		private float startX;
 		private float timeDragged = 0f;//This variable is reused for the first wait and for the dragging waits
 		private bool rotatedWithDrag = false;
+
 		public void OnMouseDown()
 		{
 				startX = Input.mousePosition.x;
@@ -48,40 +46,44 @@ public class Mirror : Beamer, IBeamable
 				else
 						rotatedWithDrag = false;//Prepare for the next click
 		}
-		#endregion Rotation
-		public override Vector3[] Receive(Beamer predecessor)
-		{
-				this.prevBeamer = predecessor;
-				predecessor.NewInChain(this);
-				return AddMeToChain(RecalculateBeam());
-		}
-
-		private Vector3[] RecalculateBeam()
-		{
-				Vector3[] reflections = LookForReflections(Position, Direction);
-				return reflections;
-		}
-
 		private void Rotate()
 		{
 				float endX = Input.mousePosition.x;
 				float dir = Mathf.Sign(endX - startX);
-				transform.Rotate(0, 0, (90f / 8f) * dir);
+				graphic.Rotate(0, 0, (90f / 8f) * dir);
 
 				//Recalculate reflections
-				InformChange();
+				UpdateBeam();
 		}
-		private void InformChange()
+		#endregion Rotation
+		#region Reflection
+		private Vector3 Normal => graphic.up;
+		private Vector3 enterDirection;//Direction of the enter ray
+		private Laser laser;
+		public override Node Conect(Vector3 hitPoint, Vector3 direction, Vector3 normal)
 		{
-				//If i'm connected to the chain
-				if (prevBeamer != null)
-				{
-						if (nextBeamer != null)
-						{
-								nextBeamer.OutOfChain();
-								nextBeamer = null;
-						}
-						ChainChanged(RecalculateBeam());
-				}
+				enterDirection = direction;
+				RecalculateBeam(direction);
+				return new Node(this, Position);
 		}
+		private void RecalculateBeam(Vector3 direction) {
+				var nodes = LookForReflections(Position, Reflect(direction));
+				DrawLaser(nodes);
+				AddNodes(nodes);
+		}
+		private Vector3 Reflect(Vector3 direction) => Vector3.Reflect(direction, Normal);
+		private void UpdateBeam()
+		{
+				Disconected();
+				RecalculateBeam(enterDirection);
+		}
+		private void DrawLaser(IList<Node> nodes)
+		{
+				var positions = AddMeToChain(nodes).Positions();
+				if (laser == null)
+						laser = LaserController.AddLaser(positions);
+				else
+						laser.Initialize(positions);
+		}
+		#endregion Reflection
 }

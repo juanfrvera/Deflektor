@@ -60,15 +60,15 @@ public class Game : MonoBehaviour
 				{
 						var val = OnSceneLoad[name].onLoad;
 						val += onLoad;
-						//OnSceneLoad[name] = val;
 				}
 				else
 						OnSceneLoad.Add(name, new SceneInfo(onLoad, setActive));
+				
 				SceneManager.LoadScene(name, LoadSceneMode.Additive);
 		}
 		private void SceneLoaded(Scene scene, LoadSceneMode mode)
 		{
-				if (OnSceneLoad.ContainsKey(scene.name))//Invocar solo si existe esta key con un valor distinto de null
+				if (OnSceneLoad.ContainsKey(scene.name))
 				{
 						SceneInfo info = OnSceneLoad[scene.name];
 						if (info.setActive)

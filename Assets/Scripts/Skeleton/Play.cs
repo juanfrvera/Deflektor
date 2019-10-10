@@ -74,7 +74,6 @@ public class Play : MonoBehaviour, IInputController
 
 		void IInputController.Enter() { }
 		#endregion UI & Input
-
 		#region Hurt
 		[SerializeField] float hurtTime;//Time between hurts
 		[SerializeField] float hurtAmount;
@@ -110,6 +109,8 @@ public class Play : MonoBehaviour, IInputController
 				Debug.LogError("Overloaded");
 		}
 		#endregion Hurt
+		[SerializeField] LayerMask beamerLayer;
+		public static LayerMask BeamerLayer => instance.beamerLayer;
 
 
 		[SerializeField] GameObject gameOverScreen;

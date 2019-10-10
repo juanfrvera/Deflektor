@@ -1,13 +1,12 @@
-﻿using UnityEngine;
+﻿using NodeSpace;
+using UnityEngine;
 public class Receiver : Beamer
 {
 		[SerializeField] Play play;
-		public override Vector3 Direction => Vector3.zero;
-
-		public override Vector3[] Receive(Beamer predecessor)
+		public override Node Conect(Vector3 hitPoint, Vector3 direction, Vector3 normal)
 		{
 				Debug.Log("Win");
 				play.LevelWon();
-				return new Vector3[] { Position };
+				return new Node(Position);
 		}
 }

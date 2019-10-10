@@ -1,23 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using NodeSpace;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Beamer : MonoBehaviour, IBeamable
 {
 		[SerializeField] float maxDistance = 100f;
-
-		protected Beamer prevBeamer, nextBeamer;
-
+		private IList<Node> nextNodes;
 		//Properties
 		public Vector3 Position => transform.position;
-		public abstract Vector3 Direction { get; }
-
 		//Methods
-		public abstract Vector3[] Receive(Beamer predecessor);
+		public abstract Node Conect(Vector3 hitPoint, Vector3 direction, Vector3 normal);
 		public virtual void Emit() { }
-
-		protected virtual Vector3[] LookForReflections(Vector3 origin, Vector3 direction)
+		protected virtual IList<Node> LookForReflections(Vector3 origin, Vector3 direction)
 		{
-				RaycastHit2D hit = Physics2D.Raycast(origin, direction);
+				RaycastHit2D hit = Physics2D.Raycast(origin, direction, maxDistance, Play.BeamerLayer);
 
 				if (hit.transform != null)
 				{
@@ -26,13 +22,12 @@ public abstract class Beamer : MonoBehaviour, IBeamable
 						{
 								if (beamer != this)
 								{
-										if (beamer != prevBeamer)
-												return beamer.Receive(this);
+										if (!beamer.AmIYourChild(this))
+												return new List<Node> { beamer.Conect(hit.point, direction, hit.normal) };
 										else
 										{
 												Debug.LogWarning("I was trying to reflect my predecessor");
-												prevBeamer.Hurt();
-												return new Vector3[] { beamer.Position };
+												return null;
 										}
 								}
 								else
@@ -40,45 +35,57 @@ public abstract class Beamer : MonoBehaviour, IBeamable
 						}
 				}
 				//Return a point outside screen
-				return new Vector3[] { origin + direction * maxDistance };
+				return new List<Node> { new Node(origin + direction * maxDistance) };
 		}
 
-		protected Vector3[] AddMeToChain(Vector3[] reflections)
+		protected IList<Node> AddMeToChain(IList<Node> chain, Vector3 position)
 		{
-				if (reflections != null)
+				Node node = new Node(this, position);
+				if (chain != null)
 				{
-						Vector3[] finalReflections = new Vector3[reflections.Length + 1];
-						finalReflections[0] = Position;//Add me firts
-						reflections.CopyTo(finalReflections, 1);//Copy the others
-
-						return finalReflections;
+						chain.Insert(0, node);//Insert at the start
+						return chain;
 				}
 				else
-						return new Vector3[] { Position };
+						return new List<Node> { node };
+		}
+		protected IList<Node> AddMeToChain(IList<Node> chain) => AddMeToChain(chain, Position);
+
+		protected virtual void AddNodes(IList<Node> nodes)
+		{
+				if (nextNodes == null)
+						nextNodes = new List<Node>(nodes.Count);
+
+				foreach (var node in nodes)
+				{
+						if (node.Beamer != null && node.Beamer == this)
+								print("I was trying to add myself");
+						else
+								nextNodes.Add(node);
+				}
 		}
 
-		public virtual void ChainChanged(Vector3[] points)
+		/// <summary>
+		/// Returns true if the beamer is one of my next nodes
+		/// </summary>
+		/// <param name="child"></param>
+		/// <returns></returns>
+		public bool AmIYourChild(Beamer child)
 		{
-				if (prevBeamer != null)
+				if (nextNodes == null)
+						return false;
+				else
+						return ((List<Node>)nextNodes).Find(n => n.Beamer == child) != null;
+		}
+		public virtual void Disconected()
+		{
+				foreach (var node in nextNodes)
 				{
-						prevBeamer.ChainChanged(AddMeToChain(points));
+						if (node.Beamer != null)
+								node.Beamer.Disconected();
 				}
-		}
-		public virtual void Hurt()
-		{
-				prevBeamer?.Hurt();
-		}
-		public virtual void NewInChain(Beamer beamer)
-		{
-				nextBeamer = beamer;
-		}
-		public virtual void OutOfChain()
-		{
-				prevBeamer = null;
-				if(nextBeamer != null)
-				{
-						nextBeamer.OutOfChain();
-						nextBeamer = null;
-				}
+
+				nextNodes.Clear();
+				print(nextNodes.Count);
 		}
 }

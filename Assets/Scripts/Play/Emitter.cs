@@ -1,35 +1,30 @@
-﻿using UnityEngine;
+﻿using NodeSpace;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class Emitter : Beamer
 {
 		[SerializeField] Play play;
-		[SerializeField] Vector3 emitDir;
-		[SerializeField] LineRenderer laser;
 		[SerializeField] float life = 5f;
 
-		public override Vector3 Direction => emitDir;
-		private void Start()
-		{
-				Emit();
-		}
+		public Vector3 Direction => transform.up;
+		private void Start() => Emit();
 
 		public override void Emit()
 		{
-				Vector3[] reflections = LookForReflections(Position, Direction);
-				ChainChanged(AddMeToChain(reflections));
+				IList<Node> nodes = LookForReflections(Position, Direction);
+				ChainChanged(AddMeToChain(nodes));
 		}
-		public override Vector3[] Receive(Beamer predecessor)
+		public override Node Conect(Vector3 hitPoint, Vector3 direction, Vector3 normal)
 		{
-				print("hurt from receive");
-				return null;
+				print("Emitter touched!");
+				return new Node(Position);
 		}
 		private bool hurting = false;
 		private bool changedFromHurt = false;
-		public override void ChainChanged(Vector3[] points)
+		public void ChainChanged(IList<Node> nodes)
 		{
-				print("chain changed, hurting: "+hurting);
-				laser.positionCount = points.Length+1;
-				laser.SetPositions(AddMeToChain(points));
+				LaserController.AddLaser(nodes.Positions());
 
 				if (changedFromHurt && hurting)
 						NotHurt();
@@ -41,7 +36,7 @@ public class Emitter : Beamer
 				hurting = false;
 				play.EndHurt();
 		}
-		public override void Hurt()
+		public void Hurt()
 		{
 				hurting = true;
 				changedFromHurt = false;
